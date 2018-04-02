@@ -37,3 +37,4 @@ mesh_v.pov
 mesh
 *.scad
 *.asc
+*.stl
