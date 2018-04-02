@@ -1,13 +1,9 @@
 # VGmesh
 
-Compile:
-'make'
+Compile:`make`
 
-Execute:
-'./mesh'
+Execute:`./mesh`
 
-Render with POV-Ray:
-'make pov'
+Render with POV-Ray:`make pov`
 
-Clean up:
-'make clean'
+Clean up:`make clean`
