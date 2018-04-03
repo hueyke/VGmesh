@@ -5,7 +5,7 @@ using namespace std;
 
 const double rr = 25;
 const double rout = 745, rin = 395, size = 87.5;
-const double z_min = rr, z_max = 10000 + rr;
+const double z_min = rr, z_max = 200;//10000 + rr;
 const double delta_t = M_PI / 6, delta_r = size, delta_z = size*2;
 const unsigned nt = 2 * M_PI / delta_t, nr = (rout - rin) / delta_r, nz = z_max/delta_z;
 const unsigned fnc = 8, fns = 24;
@@ -20,6 +20,7 @@ int main() {
     fscad = fopen("mesh.scad","w");
     fprintf(fscad, "module cylinder_ep(p1,p2,r,fn){\nvector=[p2[0]-p1[0],p2[1]-p1[1],p2[2]-p1[2]];\ndistance=sqrt(pow(vector[0],2)+pow(vector[1],2)+pow(vector[2],2));\ntranslate(vector/2+p1)\nrotate([0,0,atan2(vector[1],vector[0])])\nrotate([0,atan2(sqrt(pow(vector[0], 2)+pow(vector[1], 2)),vector[2]), 0])\ncylinder(h=distance,r1=r,r2=r,center=true,$fn=fn);\n}\nmodule sphere_at(p,r,fn){\ntranslate(p)\nsphere(r,center=true,$fn=fn);\n}\n");
     fprintf(fscad, "fnc=%d; fns=%d; rc=%g; rs=%g;\n", fnc, fns, rr, rr);
+    fprintf(fscad, "union() {\n");
 	for (unsigned iz = 0; iz < nz; ++iz) {
 		for (unsigned ir = 0; ir < nr; ++ir) {
 			for (unsigned it = 0; it < nt; ++it) {
@@ -68,6 +69,7 @@ int main() {
 			}
 		}
 	}
+	fprintf(fscad, "}\n");
   	fclose(fout);
   	fclose(fscad);
 }

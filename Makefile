@@ -1,6 +1,6 @@
 EXECUTABLES=mesh
+include $(mesh.deps)
 
-# Makefile rules
 all: $(EXECUTABLES)
 
 mesh: mesh.cc
@@ -8,6 +8,9 @@ mesh: mesh.cc
 
 pov: mesh.pov
 	povray +W600 +H600 +A0.3 +Omesh.png +GDmesh.asc mesh.pov
+
+stl: mesh.scad
+	openscad -m make -o mesh.stl -D 'quality="production"' mesh.scad
 
 clean:
 	rm -f $(EXECUTABLES)
