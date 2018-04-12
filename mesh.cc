@@ -3,9 +3,9 @@
 #include <iostream>
 using namespace std;
 
-const double rr = 25;
-const double rout = 745, rin = 395, size = 87.5;
-const double z_min = rr, z_max = 200;//10000 + rr;
+const double rr = 25e-3;
+const double rout = 745e-3, rin = 395e-3, size = 87.5e-3;
+const double z_min = rr, z_max = size*4 + rr;
 const double delta_t = M_PI / 6, delta_r = size, delta_z = size*2;
 const unsigned nt = 2 * M_PI / delta_t, nr = (rout - rin) / delta_r, nz = z_max/delta_z;
 const unsigned fnc = 8, fns = 24;
@@ -48,7 +48,7 @@ int main() {
 					fprintf(fscad,"cylinder_ep([%g,%g,%g], [%g,%g,%g],rc,fnc);\n", x2, y2, z2, x3, y3, z3);
 				} else {
 					fprintf(fout,"sphere{<%g,%g,%g>,r}\n", x1, y1, z1);
-					fprintf(fscad,"sphere_at([%g,%g,%g],rs,fns);\n", x1, y1, z1);
+					// fprintf(fscad,"sphere_at([%g,%g,%g],rs,fns);\n", x1, y1, z1);
 				}
 				fprintf(fout,"cylinder{<%g,%g,%g>,<%g,%g,%g>,r}\n", x1, y1, z1, x3, y3, z3);
 				fprintf(fscad,"cylinder_ep([%g,%g,%g], [%g,%g,%g],rc,fnc);\n", x1, y1, z1, x3, y3, z3);
