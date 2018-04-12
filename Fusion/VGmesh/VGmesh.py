@@ -30,6 +30,10 @@ def run(context):
         _ui  = _app.userInterface
 
         cmdDef = _ui.commandDefinitions.itemById('VGmeshPythonScript')
+        if not cmdDef:
+            # Create a command definition.
+            cmdDef = _ui.commandDefinitions.addButtonDefinition('VGmeshPythonScript', 'VGmesh', 'Creates a VGmesh component', 'Resources/VGmesh') 
+        
         
         # Connect to the command created event.
         onCommandCreated = VGmeshCommandCreatedHandler()
@@ -364,7 +368,7 @@ def involutePoint(baseCircleRadius, distFromCenterToInvolutePoint):
 # Builds a VGmesh.
 def drawVGmesh(design, outerRadius, innerRadius, numLayer, meshSize, memberRadius, deltaAngle):
     try:        
-        # t_begin = time.time()
+        t_begin = time.time()
         # Create a new component by creating an occurrence.
         occs = design.rootComponent.occurrences
         mat = adsk.core.Matrix3D.create()
@@ -501,8 +505,8 @@ def drawVGmesh(design, outerRadius, innerRadius, numLayer, meshSize, memberRadiu
         attrib = newComp.attributes.add('VGmesh', 'Values',str(VGmeshValues))
         
         newComp.name = 'VGmesh'
-        # t_end = time.time()
-        # _ui.messageBox('Elapsed time: %s' % str(t_end - t_begin))
+        t_end = time.time()
+        _ui.messageBox('Elapsed time: %s' % str(t_end - t_begin))
         return newComp
     except Exception as error:
         _ui.messageBox("drawVGmesh Failed : " + str(error)) 

@@ -33,7 +33,7 @@
 
 # Project
 mesh_v.pov
-*.png
+#*.png
 mesh
 *.scad
 *.asc
