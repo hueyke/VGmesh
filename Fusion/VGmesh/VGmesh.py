@@ -435,14 +435,24 @@ def drawVGmesh(design, outerRadius, innerRadius, numLayer, meshSize, memberRadiu
                 if ir > 0:
                     p7 = adsk.core.Point3D.create(r0 / math.cos(t), 0, z + meshSize)
                     create_bond(newComp, baseSketch, support_unit_angle, p1, p7, memberRadius)
-
+        plate_b = plate_unit_angle.item(0)
+        plate_unit_angle.removeByIndex(0)
+        support_b = support_unit_angle.item(0)
+        support_unit_angle.removeByIndex(0)
+        combineFeats = newComp.features.combineFeatures
+        combineInput = combineFeats.createInput(plate_b, plate_unit_angle)
+        combineInput.operation = adsk.fusion.FeatureOperations.JoinFeatureOperation
+        combineFeats.add(combineInput)
+        combineInput = combineFeats.createInput(support_b, support_unit_angle)
+        combineInput.operation = adsk.fusion.FeatureOperations.JoinFeatureOperation
+        combineFeats.add(combineInput)
+        plate_b = newComp.bRepBodies.item(0)
+        support_b = newComp.bRepBodies.item(1)
         # Copy and paste in theta
         plate = adsk.core.ObjectCollection.create()
         support = adsk.core.ObjectCollection.create()
-        for entity in plate_unit_angle:
-            plate.add(entity)
-        for entity in support_unit_angle:
-            support.add(entity)
+        plate.add(plate_b)
+        support.add(support_b)
         normal = baseSketch.xDirection.crossProduct(baseSketch.yDirection)
         normal.transformBy(baseSketch.transform)
         for it in range(1, nt):
@@ -451,42 +461,66 @@ def drawVGmesh(design, outerRadius, innerRadius, numLayer, meshSize, memberRadiu
             transform.setToRotation(theta, normal, baseSketch.origin)
             new_plate = adsk.core.ObjectCollection.create()
             new_support = adsk.core.ObjectCollection.create()
-            for body in plate_unit_angle:
-                new_plate.add(body.copyToComponent(rootComp));
-            for body in support_unit_angle:
-                new_support.add(body.copyToComponent(rootComp));
-            moveInput = rootComp.features.moveFeatures.createInput(new_plate, transform);
-            rootComp.features.moveFeatures.add(moveInput);
-            moveInput = rootComp.features.moveFeatures.createInput(new_support, transform);
-            rootComp.features.moveFeatures.add(moveInput);
+            new_plate.add(plate_b.copyToComponent(newOcc));
+            new_support.add(support_b.copyToComponent(newOcc));
+            moveInput = newComp.features.moveFeatures.createInput(new_plate, transform);
+            newComp.features.moveFeatures.add(moveInput);
+            moveInput = newComp.features.moveFeatures.createInput(new_support, transform);
+            newComp.features.moveFeatures.add(moveInput);
             for entity in new_plate:
                 plate.add(entity)
             for entity in new_support:
                 support.add(entity)
+        plate_b = plate.item(0)
+        plate.removeByIndex(0)
+        support_b = support.item(0)
+        support.removeByIndex(0)
+        combineFeats = newComp.features.combineFeatures
+        combineInput = combineFeats.createInput(plate_b, plate)
+        combineInput.operation = adsk.fusion.FeatureOperations.JoinFeatureOperation
+        combineFeats.add(combineInput)
+        combineInput = combineFeats.createInput(support_b, support)
+        combineInput.operation = adsk.fusion.FeatureOperations.JoinFeatureOperation
+        combineFeats.add(combineInput)
+
+        plate_b = newComp.bRepBodies.item(0)
+        support_b = newComp.bRepBodies.item(1)
 
         # Copy and paste in z
         rot = adsk.core.Matrix3D.create()
         rot.setToRotation(deltaAngle / 2, normal, baseSketch.origin)
+        bodies = adsk.core.ObjectCollection.create()
+        bodies.add(plate_b)
+        bodies.add(support_b)
         for iz in range(1, nz):
             transform = adsk.core.Matrix3D.create()
             transform.translation = adsk.core.Vector3D.create(0, 0, meshSize * iz)
             new_plate = adsk.core.ObjectCollection.create()
-            for body in plate:
-                new_plate.add(body.copyToComponent(rootComp));
-            moveInput = rootComp.features.moveFeatures.createInput(new_plate, transform);
-            rootComp.features.moveFeatures.add(moveInput);
+            new_plate.add(plate_b.copyToComponent(newOcc));
+            moveInput = newComp.features.moveFeatures.createInput(new_plate, transform);
+            newComp.features.moveFeatures.add(moveInput);
+            bodies.add(newComp.bRepBodies.item(newComp.bRepBodies.count - 1))
             if iz % 2 == 1:
-                moveInput = rootComp.features.moveFeatures.createInput(new_plate, rot);
-                rootComp.features.moveFeatures.add(moveInput);
+                moveInput = newComp.features.moveFeatures.createInput(new_plate, rot);
+                newComp.features.moveFeatures.add(moveInput);
             if iz < nz - 1:
                 new_support = adsk.core.ObjectCollection.create()
-                for body in support:
-                    new_support.add(body.copyToComponent(rootComp));
-                moveInput = rootComp.features.moveFeatures.createInput(new_support, transform);
-                rootComp.features.moveFeatures.add(moveInput);
+                new_support.add(support_b.copyToComponent(newOcc));
+                moveInput = newComp.features.moveFeatures.createInput(new_support, transform);
+                newComp.features.moveFeatures.add(moveInput);
                 if iz % 2 == 1:
-                    moveInput = rootComp.features.moveFeatures.createInput(new_support, rot);
-                    rootComp.features.moveFeatures.add(moveInput);
+                    moveInput = newComp.features.moveFeatures.createInput(new_support, rot);
+                    newComp.features.moveFeatures.add(moveInput)
+                bodies.add(newComp.bRepBodies.item(newComp.bRepBodies.count - 1))
+        
+        # for i in range(0, bodies.count - 1):
+        #     combineFeats = newComp.features.combineFeatures
+        #     that = adsk.core.ObjectCollection.create()
+        #     that.add(bodies.item(i + 1))
+        #     combineInput = combineFeats.createInput(bodies.item(i), that)
+        #     combineInput.operation = adsk.fusion.FeatureOperations.JoinFeatureOperation
+        #     combineFeats.add(combineInput)
+
 
         # Group everything used to create the gear in the timeline.
         timelineGroups = design.timeline.timelineGroups
