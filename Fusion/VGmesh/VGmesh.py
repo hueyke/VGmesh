@@ -386,6 +386,7 @@ def drawVGmesh(design, outerRadius, innerRadius, numLayer, meshSize, memberRadiu
         nr = math.floor((outerRadius - innerRadius) / meshSize) + 1
         nt = round(2 * math.pi / deltaAngle)
         nz = numLayer        
+        global t 
         t = deltaAngle / 2
         z = 0
         plate_unit_angle = adsk.core.ObjectCollection.create()
@@ -448,6 +449,7 @@ def drawVGmesh(design, outerRadius, innerRadius, numLayer, meshSize, memberRadiu
         combineFeats.add(combineInput)
         plate_b = newComp.bRepBodies.item(0)
         support_b = newComp.bRepBodies.item(1)
+
         # Copy and paste in theta
         plate = adsk.core.ObjectCollection.create()
         support = adsk.core.ObjectCollection.create()
@@ -513,13 +515,13 @@ def drawVGmesh(design, outerRadius, innerRadius, numLayer, meshSize, memberRadiu
                     newComp.features.moveFeatures.add(moveInput)
                 bodies.add(newComp.bRepBodies.item(newComp.bRepBodies.count - 1))
         
-        # for i in range(0, bodies.count - 1):
-        #     combineFeats = newComp.features.combineFeatures
-        #     that = adsk.core.ObjectCollection.create()
-        #     that.add(bodies.item(i + 1))
-        #     combineInput = combineFeats.createInput(bodies.item(i), that)
-        #     combineInput.operation = adsk.fusion.FeatureOperations.JoinFeatureOperation
-        #     combineFeats.add(combineInput)
+        for i in range(0, bodies.count - 1):
+            combineFeats = newComp.features.combineFeatures
+            that = adsk.core.ObjectCollection.create()
+            that.add(bodies.item(i + 1))
+            combineInput = combineFeats.createInput(bodies.item(i), that)
+            combineInput.operation = adsk.fusion.FeatureOperations.JoinFeatureOperation
+            combineFeats.add(combineInput)
 
 
         # Group everything used to create the gear in the timeline.
@@ -547,6 +549,7 @@ def drawVGmesh(design, outerRadius, innerRadius, numLayer, meshSize, memberRadiu
         return None
 
 def create_bond(rootComp, rootSketch, container, start, end, r):
+    global t 
     planes = rootComp.constructionPlanes
     planeInput = planes.createInput()
     line_sketch = rootComp.sketches.add(rootComp.xYConstructionPlane)
@@ -561,7 +564,7 @@ def create_bond(rootComp, rootSketch, container, start, end, r):
     circle1 = circles.addByCenterRadius(adsk.core.Point3D.create(0, 0, 0), r)
     profile0 = sketch1.profiles.item(0)
     extrudes = rootComp.features.extrudeFeatures
-    dist = adsk.core.ValueInput.createByReal(start.distanceTo(end))
+    dist = adsk.core.ValueInput.createByReal(start.distanceTo(end) + r * math.tan(t))
     extrude1 = extrudes.addSimple(profile0, dist, adsk.fusion.FeatureOperations.NewBodyFeatureOperation)
     container.add(rootComp.bRepBodies.item(rootComp.bRepBodies.count - 1))
     line_sketch.deleteMe()
